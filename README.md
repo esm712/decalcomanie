@@ -14,10 +14,6 @@
 - Mattermost
 - Notion
 
-### Infra
-![DecalcomanieSystemArchitecture](/uploads/b2f3756ad6adc41b7b4f60a1b2e81a5a/DecalcomanieSystemArchitecture.png)
-
-
 ### **`AWS`**
 - EC2 (ubuntu 20.04 LTS)
 
