@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # mariadb 개발 환경 세팅
+  mariadb:
+    image: mariadb:latest
+    container_name: decalcomanie-mariadb
+    restart: always
+    environment:
+      - MARIADB_DATABASE=decalcomanie
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=decalcomanie!234
+      - MARIADB_ROOT_PASSWORD=admin!234
+      - TZ=Asia/Seoul
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:

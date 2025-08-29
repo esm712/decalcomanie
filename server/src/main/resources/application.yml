@@ -1,8 +1,8 @@
 server:
-  port: 8080
+  port: 8081
 
   servlet:
-    context-path: /api
+#    context-path: /api
     encoding:
       charset: UTF-8
       force: true
@@ -40,11 +40,13 @@ spring:
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     hikari:
-      maximum-pool-size: 250
-      max-lifetime: 60000
+      maximum-pool-size: 131      # 안전하게 설정
+      minimum-idle: 10
+      idle-timeout: 600000        # 10분
+      max-lifetime: 1800000       # 30분
 
   jpa:
-#    show-sql: true
+    show-sql: true
     hibernate:
       ddl-auto: update
       naming:
