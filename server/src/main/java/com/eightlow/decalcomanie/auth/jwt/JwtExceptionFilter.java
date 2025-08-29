@@ -26,9 +26,9 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         try {
-            chain.doFilter(request, response); // JwtAuthenticationFilter로 이동
+            chain.doFilter(request, response); // JwtFilter로 이동
         } catch (JwtException ex) {
-            // JwtAuthenticationFilter에서 예외 발생하면 바로 setErrorResponse 호출
+            // JwtFilter에서 예외 발생하면 바로 setErrorResponse 호출
             setErrorResponse(request, response, ex);
         }
     }
