@@ -11,7 +11,7 @@ import com.eightlow.decalcomanie.sns.entity.Comment;
 import org.springframework.http.ResponseEntity;
 
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

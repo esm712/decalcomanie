@@ -24,8 +24,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -204,10 +204,10 @@ public class OAuthController {
 
             oAuthService.updateRefreshToken(refreshToken, userId);
 
-            return new ResponseEntity("refreshToken 재발급 완료!", responseHeader, HttpStatus.OK);
+            return new ResponseEntity<>("refreshToken 재발급 완료!", responseHeader, HttpStatus.OK);
         }
 
-        return new ResponseEntity("refreshToken 대조 실패! 로그아웃", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("refreshToken 대조 실패! 로그아웃", HttpStatus.UNAUTHORIZED);
     }
 
     @PostMapping("/signout")

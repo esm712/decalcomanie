@@ -1,8 +1,6 @@
 package com.eightlow.decalcomanie.sns.repository;
 
-import com.eightlow.decalcomanie.sns.entity.Article;
 import com.eightlow.decalcomanie.sns.entity.ArticlePerfume;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

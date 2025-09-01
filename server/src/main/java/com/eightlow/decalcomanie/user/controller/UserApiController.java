@@ -25,9 +25,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

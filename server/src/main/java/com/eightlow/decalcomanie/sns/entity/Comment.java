@@ -5,7 +5,7 @@ import com.eightlow.decalcomanie.user.entity.User;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Data

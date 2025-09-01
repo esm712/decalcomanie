@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
