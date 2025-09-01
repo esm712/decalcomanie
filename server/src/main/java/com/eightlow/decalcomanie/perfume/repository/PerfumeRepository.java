@@ -11,6 +11,4 @@ import java.util.Optional;
 @Repository
 public interface PerfumeRepository extends JpaRepository<Perfume, Integer> {
     List<Perfume> findAll();
-
-    List<Perfume> findByPerfumeId(int perfumeId);
 }

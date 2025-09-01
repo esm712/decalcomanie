@@ -10,6 +10,7 @@ import com.eightlow.decalcomanie.perfume.entity.Scent;
 import com.eightlow.decalcomanie.perfume.mapper.PerfumeMapper;
 import com.eightlow.decalcomanie.perfume.mapper.ScentMapper;
 import com.eightlow.decalcomanie.perfume.repository.PerfumePickRepository;
+import com.eightlow.decalcomanie.perfume.repository.PerfumeRepository;
 import com.eightlow.decalcomanie.sns.repository.ArticleRepository;
 import com.eightlow.decalcomanie.sns.repository.BookMarkRepository;
 import com.eightlow.decalcomanie.sns.repository.CommentRepository;
@@ -28,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.*;
 
 import static com.eightlow.decalcomanie.perfume.entity.QPerfume.perfume;
@@ -53,39 +54,54 @@ public class UserServiceImpl implements IUserService {
     private final EntityManager em;
     private final UserPerfumeRecommendRepository userPerfumeRecommendRepository;
     private final JPAQueryFactory queryFactory;
+    private final PerfumeRepository perfumeRepository;
 
-
+    /**
+     * 사용자가 보유한 향수를 등록한다.
+     * @param userId - 사용자 아이디
+     * @param perfumeId - 향수 아이디
+     * @return
+     */
     @Override
-    public String modifyUserPerfume(String userId, int perfumeId) {
-        UserPerfumeId up = UserPerfumeId.builder()
-                .user(userId)
-                .perfume(perfumeId)
-                .build();
+    public String registerUserPerfume(String userId, Integer perfumeId) {
+        UserPerfumeId userPerfumeId = new UserPerfumeId(userId, perfumeId);
 
-        UserPerfume userPerfume = em.find(UserPerfume.class, up);
-
-        if(userPerfume == null) {
-            User user = em.find(User.class, userId);
-            Perfume perfume = em.find(Perfume.class, perfumeId);
-
-            if(user == null) {
-                throw new CustomException(CustomErrorCode.USER_NOT_FOUND);
-            }
-
-            if(perfume == null) {
-                throw new CustomException(CustomErrorCode.PERFUME_NOT_FOUND);
-            }
-
-            userPerfume = UserPerfume.builder()
-                    .user(user)
-                    .perfume(perfume)
-                    .build();
-
-            userPerfumeRepository.save(userPerfume);
-            return "향수가 등록되었습니다";
+        // 이미 등록되어 있는지 확인
+        if(userPerfumeRepository.existsById(userPerfumeId)) {
+            return "이미 등록된 향수입니다";
         }
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
+
+        Perfume perfume = perfumeRepository.findById(perfumeId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.PERFUME_NOT_FOUND));
+
+        userPerfumeRepository.save(
+                UserPerfume.builder()
+                        .user(user)
+                        .perfume(perfume)
+                        .build()
+        );
+
+        return "향수가 등록되었습니다";
+    }
+
+    /**
+     * 사용자가 보유한 향수를 삭제한다.
+     * @param userId - 사용자 아이디
+     * @param perfumeId - 향수 아이디
+     * @return
+     */
+    @Override
+    public String deleteUserPerfume(String userId, Integer perfumeId) {
+        UserPerfumeId userPerfumeId = new UserPerfumeId(userId, perfumeId);
+
+        UserPerfume userPerfume = userPerfumeRepository.findById(userPerfumeId)
+                .orElseThrow(() -> new CustomException(CustomErrorCode.SCENT_NOT_FOUND));
+
         userPerfumeRepository.delete(userPerfume);
+
         return "향수가 제거되었습니다";
     }
 

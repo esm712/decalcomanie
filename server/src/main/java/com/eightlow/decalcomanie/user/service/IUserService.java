@@ -11,7 +11,12 @@ import com.eightlow.decalcomanie.user.dto.response.ProfileResponse;
 import java.util.List;
 
 public interface IUserService {
-    String modifyUserPerfume(String userId, int perfumeId);
+
+    // 사용자 보유 향수 등록
+    String registerUserPerfume(String userId, Integer perfumeId);
+
+    // 사용자 보유 향수 삭제
+    String deleteUserPerfume(String userId, Integer perfumeId);
 
     List<PerfumeDto> getUserPerfume(String userId);
 
