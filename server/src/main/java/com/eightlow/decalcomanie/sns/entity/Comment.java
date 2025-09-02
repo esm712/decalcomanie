@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Data
+@EqualsAndHashCode(callSuper = true)
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
