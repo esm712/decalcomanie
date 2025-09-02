@@ -21,6 +21,7 @@ import com.eightlow.decalcomanie.user.entity.UserScent;
 import com.eightlow.decalcomanie.user.mapper.UserMapper;
 import com.eightlow.decalcomanie.user.service.IUserService;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,12 +88,12 @@ public class ArticleServiceImpl implements IArticleService {
 
 
         for(int i = 0; i < perfumeIds.size(); i++) {
-            long cnt = queryFactory
-                    .selectFrom(articlePerfume)
-                    .where(
-                            articlePerfume.perfume.perfumeId.eq(perfumeIds.get(i))
-                    )
-                    .fetchCount();
+            long cnt = Optional.ofNullable(queryFactory
+                    .select(Wildcard.count)
+                    .from(articlePerfume)
+                    .where(articlePerfume.perfume.perfumeId.eq(perfumeIds.get(i)))
+                    .fetchOne()
+            ).orElse(0L);
 
             Float sum = queryFactory
                     .select(articlePerfume.rate.sum())
