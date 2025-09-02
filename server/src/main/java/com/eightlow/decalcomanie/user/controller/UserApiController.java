@@ -53,10 +53,17 @@ public class UserApiController {
     @Value("${spring.kakao.admin-key}")
     private String kakaoAdminKey;
 
-    // 사용자 향수 등록, 삭제
-    @PostMapping("/perfume/manage")
-    public ResponseEntity<String> modifyUserPerfume(@RequestBody Map<String, Integer> request, HttpServletRequest req) {
-        String userMessage = userService.modifyUserPerfume((String)req.getAttribute("userId"), request.get("perfumeId"));
+    // 사용자 향수 등록
+    @PostMapping("/perfume/register")
+    public ResponseEntity<String> registerUserPerfume(@RequestBody Map<String, Integer> request, HttpServletRequest req) {
+        String userMessage = userService.registerUserPerfume((String)req.getAttribute("userId"), request.get("perfumeId"));
+        return new ResponseEntity<>(userMessage, HttpStatus.CREATED);
+    }
+
+    // 사용자 향수 삭제
+    @PostMapping("/perfume/delete")
+    public ResponseEntity<String> deleteUserPerfume(@RequestBody Map<String, Integer> request, HttpServletRequest req) {
+        String userMessage = userService.deleteUserPerfume((String)req.getAttribute("userId"), request.get("perfumeId"));
         return new ResponseEntity<>(userMessage, HttpStatus.CREATED);
     }
 
@@ -75,7 +82,13 @@ public class UserApiController {
     // 팔로우
     @PostMapping("/follow")
     public ResponseEntity<String> followUser(@RequestBody Map<String, String> request, HttpServletRequest req) {
-        return new ResponseEntity<>(userService.followUser((String)req.getAttribute("userId"), request.get("to")), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.follow((String)req.getAttribute("userId"), request.get("to")), HttpStatus.CREATED);
+    }
+
+    // 언팔로우
+    @PostMapping("/unfollow")
+    public ResponseEntity<String> unfollowUser(@RequestBody Map<String, String> request, HttpServletRequest req) {
+        return new ResponseEntity<>(userService.unfollow((String)req.getAttribute("userId"), request.get("to")), HttpStatus.CREATED);
     }
 
     // 팔로잉 목록 조회
@@ -194,7 +207,7 @@ public class UserApiController {
 
     @GetMapping("/profile/{userId}")
     public ResponseEntity<ProfileResponse> getProfile(@PathVariable String userId, HttpServletRequest req) {
-        return new ResponseEntity(userService.getUserProfile(userId, (String)req.getAttribute("userId")), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getUserProfile(userId, (String)req.getAttribute("userId")), HttpStatus.OK);
     }
 
 }

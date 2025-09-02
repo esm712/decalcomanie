@@ -11,6 +11,7 @@ import com.eightlow.decalcomanie.perfume.mapper.PerfumeMapper;
 import com.eightlow.decalcomanie.perfume.mapper.ScentMapper;
 import com.eightlow.decalcomanie.perfume.repository.PerfumePickRepository;
 import com.eightlow.decalcomanie.perfume.repository.PerfumeRepository;
+import com.eightlow.decalcomanie.perfume.repository.ScentRepository;
 import com.eightlow.decalcomanie.sns.repository.ArticleRepository;
 import com.eightlow.decalcomanie.sns.repository.BookMarkRepository;
 import com.eightlow.decalcomanie.sns.repository.CommentRepository;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.eightlow.decalcomanie.perfume.entity.QPerfume.perfume;
 import static com.eightlow.decalcomanie.sns.entity.QArticle.article;
@@ -55,6 +57,7 @@ public class UserServiceImpl implements IUserService {
     private final UserPerfumeRecommendRepository userPerfumeRecommendRepository;
     private final JPAQueryFactory queryFactory;
     private final PerfumeRepository perfumeRepository;
+    private final ScentRepository scentRepository;
 
     /**
      * 사용자가 보유한 향수를 등록한다.
@@ -63,6 +66,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
+    @Transactional
     public String registerUserPerfume(String userId, Integer perfumeId) {
         UserPerfumeId userPerfumeId = new UserPerfumeId(userId, perfumeId);
 
@@ -94,6 +98,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
+    @Transactional
     public String deleteUserPerfume(String userId, Integer perfumeId) {
         UserPerfumeId userPerfumeId = new UserPerfumeId(userId, perfumeId);
 
@@ -105,26 +110,32 @@ public class UserServiceImpl implements IUserService {
         return "향수가 제거되었습니다";
     }
 
+    /**
+     * 사용자가 보유한 향수들을 가져온다.
+     * @param userId - 사용자 아이디
+     * @return
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<PerfumeDto> getUserPerfume(String userId) {
-        List<UserPerfume> userPerfumes = userPerfumeRepository.findByUser_UserId(userId);
-        List<PerfumeDto> result = new ArrayList<>();
-
-        for(UserPerfume perfume : userPerfumes) {
-            result.add(perfumeMapper.toDto(perfume.getPerfume()));
-        }
-
-        return result;
+        return userPerfumeRepository.findByUser_UserId(userId).stream()
+                .map(UserPerfume::getPerfume)
+                .map(perfumeMapper::toDto)
+                .toList();
     }
 
-    // following = 팔로우 주체의 userId, followed = 팔로우를 할 사람의 userId
+    /**
+     * 사용자가 팔로우한다.
+     * @param following - 팔로우하는 유저아이디
+     * @param followed - 팔로우할 유저아이디
+     * @return
+     */
     @Override
-    public String followUser(String following, String followed) {
+    @Transactional
+    public String follow(String following, String followed) {
         if(isFollowing(following, followed)) {
-            followRepository.deleteByFollowingAndFollowed(following, followed);
-            return "팔로우가 취소되었습니다";
+            throw new CustomException(CustomErrorCode.ALREADY_FOLLOWING);
         }
-
         Follow follow = Follow.builder()
                 .following(following)
                 .followed(followed)
@@ -134,95 +145,111 @@ public class UserServiceImpl implements IUserService {
         return "팔로우가 완료되었습니다";
     }
 
-    // 팔로잉 하고 있는 유저들의 정보를 가져온다
+    /**
+     * 사용자가 언팔로우한다.
+     * @param following - 언팔로우하는 유저아이디
+     * @param followed - 언팔로우할 유저아이디
+     * @return
+     */
     @Override
+    @Transactional
+    public String unfollow(String following, String followed) {
+        if(!isFollowing(following, followed)) {
+            throw new CustomException(CustomErrorCode.ALREADY_UNFOLLOWING);
+        }
+        followRepository.deleteByFollowingAndFollowed(following, followed);
+        return "팔로우가 취소되었습니다";
+    }
+
+    /**
+     * 사용자의 팔로우 여부를 확인한다.
+     * @param following - 팔로우하는 유저아이디
+     * @param followed - 팔로우하고있는 유저아이디
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isFollowing(String following, String followed) {
+        return Optional.ofNullable(followRepository.findByFollowingAndFollowed(following, followed)).isPresent();
+    }
+
+    /**
+     * 사용자가 팔로우하고 있는 유저들의 정보를 가져온다.
+     * @param userId - 현재 사용자 아이디
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = true)
     public List<FollowingResponse> getFollowingUsers(String userId) {
         // following 컬럼의 userId를 기준으로 조회
         List<Follow> myFollowing = followRepository.findByFollowing(userId);
-        List<FollowingResponse> result = new ArrayList<>();
 
-        if(myFollowing.size() > 0) {
-            for(Follow follow : myFollowing) {
-                // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
-                UserInfoDto userInfoDto = getUserInfo(follow.getFollowed());
+        return myFollowing.stream()
+                .map(follow -> {
+                    // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
+                    UserInfoDto userInfoDto = getUserInfo(follow.getFollowed());
 
-                // 반환 포맷에 맞는 response 생성
-                FollowingResponse response = FollowingResponse.builder()
-                        .userId(userInfoDto.getUser().getUserId())
-                        .nickname(userInfoDto.getUser().getNickname())
-                        .favorite(userInfoDto.getFavorities())
-                        .hates(userInfoDto.getHates())
-                        .picture(userInfoDto.getUser().getPicture())
-                        .build();
-
-                result.add(response);
-            }
-        }
-
-        return result;
+                    return FollowingResponse.builder()
+                            .userId(userInfoDto.getUser().getUserId())
+                            .nickname(userInfoDto.getUser().getNickname())
+                            .favorite(userInfoDto.getFavorities())
+                            .hates(userInfoDto.getHates())
+                            .picture(userInfoDto.getUser().getPicture())
+                            .build();
+                })
+                .toList();
     }
 
-    // 팔로워 목록 조회
+    /**
+     * 사용자 팔로우하고 있는 팔로워들을 조회한다.
+     * @param userId - 현재 사용자 아이디
+     * @return
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<FollowerResponse> getFollowers(String userId) {
         List<Follow> myFollower = followRepository.findByFollowed(userId);
-        List<FollowerResponse> result = new ArrayList<>();
 
-        if(myFollower.size() > 0) {
-            for(Follow follow : myFollower) {
-                // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
-                UserInfoDto userInfoDto = getUserInfo(follow.getFollowing());
+        return myFollower.stream()
+                .map(follow -> {
+                    // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
+                    UserInfoDto userInfoDto = getUserInfo(follow.getFollowing());
 
-                // 반환 포맷에 맞는 response 생성
-                FollowerResponse response = FollowerResponse.builder()
-                        .userId(userInfoDto.getUser().getUserId())
-                        .nickname(userInfoDto.getUser().getNickname())
-                        .favorite(userInfoDto.getFavorities())
-                        .hates(userInfoDto.getHates())
-                        .picture(userInfoDto.getUser().getPicture())
-                        .isFollowing(isFollowing(userId, userInfoDto.getUser().getUserId()))
-                        .build();
-
-                result.add(response);
-            }
-        }
-
-        return result;
+                    // 반환 포맷에 맞는 response 생성
+                    return FollowerResponse.builder()
+                            .userId(userInfoDto.getUser().getUserId())
+                            .nickname(userInfoDto.getUser().getNickname())
+                            .favorite(userInfoDto.getFavorities())
+                            .hates(userInfoDto.getHates())
+                            .picture(userInfoDto.getUser().getPicture())
+                            .isFollowing(isFollowing(userId, userInfoDto.getUser().getUserId()))
+                            .build();
+                })
+                .toList();
     }
 
-    // 팔로우 여부
+    /**
+     * 사용자 정보와 좋아하는 향, 싫어하는 향을 조회한다.
+     * @param userId - 사용자 아이디
+     * @return
+     */
     @Override
-    public boolean isFollowing(String following, String followed) {
-        Follow follow = followRepository.findByFollowingAndFollowed(following, followed);
-
-        if(follow == null) return false;
-        return true;
-    }
-
-    // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보
-    @Override
+    @Transactional(readOnly = true)
     public UserInfoDto getUserInfo(String userId) {
-        User user = em.find(User.class, userId);
 
-        if(user == null) {
-            throw new CustomException(CustomErrorCode.USER_NOT_FOUND);
-        }
-
-        List<ScentDto> favorite = new ArrayList<>();
-        List<ScentDto> hate = new ArrayList<>();
+        User user =userRepository.findById(userId).orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
 
         // userScent 테이블에서 팔로잉 하고 있는 사람의 좋아하는 향, 싫어하는 향을 조회
         List<UserScent> userScentList = userScentRepository.findUserScentByUser_UserId(userId);
 
-        if(userScentList != null) {
-            for (UserScent userScent : userScentList) {
-                if(userScent.getStatus().getValue().equals("FAVORITE")) {
-                    favorite.add(scentMapper.toDto(userScent.getScent()));
-                } else if(userScent.getStatus().getValue().equals("HATE")) {
-                    hate.add(scentMapper.toDto(userScent.getScent()));
-                }
-            }
-        }
+        List<ScentDto> favorite = userScentList.stream()
+                .filter(us -> "FAVORITE".equals(us.getStatus().getValue()))
+                .map(us -> scentMapper.toDto(us.getScent()))
+                .toList();
+        List<ScentDto> hate = userScentList.stream()
+                .filter(us -> "HATE".equals(us.getStatus().getValue()))
+                .map(us -> scentMapper.toDto(us.getScent()))
+                .toList();
 
         return UserInfoDto.builder()
                 .user(userMapper.toDto(user))
@@ -231,77 +258,86 @@ public class UserServiceImpl implements IUserService {
                 .build();
     }
 
+    /**
+     * 다른 유저의 팔로잉 목록을 조회한다.
+     * @param userId - 조회 대상 유저 아이디 (팔로잉 목록을 확인할 유저)
+     * @param myId - 현재 로그인한 유저 아이디 (팔로잉 여부, 버튼 활성화 여부 판단용)
+     * @return
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<FollowerResponse> getOtherFollowingUsers(String userId, String myId) {
         // following 컬럼의 userId를 기준으로 조회
         List<Follow> followings = followRepository.findByFollowing(userId);
-        List<FollowerResponse> result = new ArrayList<>();
 
-        if(followings.size() > 0) {
-            for(Follow follow : followings) {
-                // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
-                UserInfoDto userInfoDto = getUserInfo(follow.getFollowed());
+        return followings.stream()
+                .map(follow -> {
+                    // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
+                    UserInfoDto userInfoDto = getUserInfo(follow.getFollowed());
 
-                FollowerResponse response = FollowerResponse.builder()
-                        .userId(userInfoDto.getUser().getUserId())
-                        .nickname(userInfoDto.getUser().getNickname())
-                        .favorite(userInfoDto.getFavorities())
-                        .hates(userInfoDto.getHates())
-                        .picture(userInfoDto.getUser().getPicture())
-                        .isFollowing(isFollowing(myId, userInfoDto.getUser().getUserId()))
-                        .isFollowingButtonActivate(!userInfoDto.getUser().getUserId().equals(myId))
-                        .build();
-
-                result.add(response);
-            }
-        }
-
-        return result;
+                    return FollowerResponse.builder()
+                            .userId(userInfoDto.getUser().getUserId())
+                            .nickname(userInfoDto.getUser().getNickname())
+                            .favorite(userInfoDto.getFavorities())
+                            .hates(userInfoDto.getHates())
+                            .picture(userInfoDto.getUser().getPicture())
+                            .isFollowing(isFollowing(myId, userInfoDto.getUser().getUserId()))
+                            .isFollowingButtonActivate(!userInfoDto.getUser().getUserId().equals(myId))
+                            .build();
+                })
+                .toList();
     }
 
+    /**
+     * 다른 유저의 팔로우 목록을 조회한다.
+     * @param userId - 조회 대상 유저 아이디 (팔로우 목록을 확인할 유저)
+     * @param myId - 현재 로그인한 유저 아이디 (팔로우 여부, 버튼 활성화 여부 판단용)
+     * @return
+     */
     @Override
+    @Transactional(readOnly = true)
     public List<FollowerResponse> getOtherFollowers(String userId, String myId) {
         List<Follow> followers = followRepository.findByFollowed(userId);
-        List<FollowerResponse> result = new ArrayList<>();
 
-        if(followers.size() > 0) {
-            for(Follow follow : followers) {
-                // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
-                UserInfoDto userInfoDto = getUserInfo(follow.getFollowing());
+        return followers.stream()
+                .map(follow -> {
+                    // 사용자 정보와 좋아하는 향, 싫어하는 향의 정보들을 가져온다.
+                    UserInfoDto userInfoDto = getUserInfo(follow.getFollowing());
 
-                FollowerResponse response = FollowerResponse.builder()
-                        .userId(userInfoDto.getUser().getUserId())
-                        .nickname(userInfoDto.getUser().getNickname())
-                        .favorite(userInfoDto.getFavorities())
-                        .hates(userInfoDto.getHates())
-                        .picture(userInfoDto.getUser().getPicture())
-                        .isFollowing(isFollowing(myId, userInfoDto.getUser().getUserId()))
-                        .isFollowingButtonActivate(!userInfoDto.getUser().getUserId().equals(myId))
-                        .build();
-
-                result.add(response);
-            }
-        }
-
-        return result;
+                    return FollowerResponse.builder()
+                            .userId(userInfoDto.getUser().getUserId())
+                            .nickname(userInfoDto.getUser().getNickname())
+                            .favorite(userInfoDto.getFavorities())
+                            .hates(userInfoDto.getHates())
+                            .picture(userInfoDto.getUser().getPicture())
+                            .isFollowing(isFollowing(myId, userInfoDto.getUser().getUserId()))
+                            .isFollowingButtonActivate(!userInfoDto.getUser().getUserId().equals(myId))
+                            .build();
+                })
+                .toList();
     }
 
+    /**
+     * 닉네임 중복을 체크한다.
+     * @param nickname - 닉네임
+     * @return
+     */
     @Override
+    @Transactional(readOnly = true)
     public boolean checkDuplicated(String nickname) {
-        User user = userRepository.findByNickname(nickname);
-        if(user == null) return true;
-        return false;
+        return Optional.ofNullable(userRepository.findByNickname(nickname)).isEmpty();
     }
 
+    /**
+     * 유저 정보를 수정한다.
+     * @param request - 수정할 내용
+     * @param userId - 수정할 유저 아이디
+     * @return
+     */
     @Override
     @Transactional
     public String updateUserInfo(UserInfoUpdateRequest request, String userId) {
-        User user = em.find(User.class, userId);
-
-        if(user == null) {
-            throw new CustomException(CustomErrorCode.USER_NOT_FOUND);
-        }
-
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CustomErrorCode.USER_NOT_FOUND));
         user.updateNickname(request.getNickname());
         user.updatePicture(request.getPicture());
 
@@ -310,41 +346,27 @@ public class UserServiceImpl implements IUserService {
         List<Integer> favorites = request.getFavorite();
         List<Integer> hates = request.getHate();
 
-        for(int scentId : favorites) {
-            Scent scent = em.find(Scent.class, scentId);
-
-            if(scent == null) {
-                throw new CustomException(CustomErrorCode.SCENT_NOT_FOUND);
-            }
-
+        Stream.concat(
+                favorites.stream().map(id -> Map.entry(id, Status.FAVORITE)),
+                hates.stream().map(id -> Map.entry(id, Status.HATE))
+        ).forEach(entry -> {
+            Scent scent = scentRepository.findById(entry.getKey()).orElseThrow(() -> new CustomException(CustomErrorCode.SCENT_NOT_FOUND));
             userScentRepository.save(
                     UserScent.builder()
                             .scent(scent)
                             .user(user)
-                            .status(Status.FAVORITE)
+                            .status(entry.getValue())
                             .build()
             );
-        }
-
-        for(int scentId : hates) {
-            Scent scent = em.find(Scent.class, scentId);
-
-            if(scent == null) {
-                throw new CustomException(CustomErrorCode.SCENT_NOT_FOUND);
-            }
-
-            userScentRepository.save(
-                    UserScent.builder()
-                            .scent(scent)
-                            .user(user)
-                            .status(Status.HATE)
-                            .build()
-            );
-        }
+        });
 
         return request.getNickname();
     }
 
+    /**
+     * 사용자 탈퇴
+     * @param userId
+     */
     @Override
     @Transactional
     public void withdrawUser(String userId) {
@@ -377,6 +399,7 @@ public class UserServiceImpl implements IUserService {
 
     // 사용자 개인 추천 향수
     @Override
+    @Transactional
     public List<PerfumeDto> recommendUserPerfume(String userId) {
         // 사용자 향 단위 벡터 계산
         Map<ScentDto,Double> userPerfumeVector = userAccordVector(userId);
@@ -515,6 +538,7 @@ public class UserServiceImpl implements IUserService {
 
     // 사용자 추천 향수 캐시 조회
     @Override
+    @Transactional(readOnly = true)
     public List<PerfumeDto> getUserPerfumeRecommend(String userId){
         List<UserPerfumeRecommend> searchResult = queryFactory.selectFrom(userPerfumeRecommend)
                 .where(userPerfumeRecommend.user.userId.eq(userId))
@@ -536,6 +560,7 @@ public class UserServiceImpl implements IUserService {
 
     // 사용자 TOP 3 향 조회
     @Override
+    @Transactional(readOnly = true)
     public List<ScentDto> getTopThreeScent(String userId) {
         List<ScentDto> result = new ArrayList<>();
         // 사용자가 보유하고 있는 향수의 향들에대한 퍼센트 Map 생성
@@ -577,6 +602,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProfileResponse getUserProfile(String userId, String myId) {
         UserInfoDto userInfoDto = getUserInfo(userId).toBuilder()
                 .isFollowing(isFollowing(myId, userId))

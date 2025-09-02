@@ -18,11 +18,17 @@ public interface IUserService {
     // 사용자 보유 향수 삭제
     String deleteUserPerfume(String userId, Integer perfumeId);
 
+    // 사용자 보유 향수 조회
     List<PerfumeDto> getUserPerfume(String userId);
+
+    // 사용자 팔로우
+    String follow(String following, String followed);
+
+    // 사용자 언팔로우
+    String unfollow(String following, String followed);
 
     boolean isFollowing(String from, String to);
 
-    String followUser(String from, String to);
 
     List<FollowingResponse> getFollowingUsers(String userId);
 
