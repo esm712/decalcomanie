@@ -38,8 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             Jws<Claims> claims = JwtUtils.parseToken(token, secretKey);
-            String nickname = claims.getBody().get("nickname", String.class);
-            String userId = claims.getBody().get("userId", String.class);
+            String nickname = claims.getPayload().get("nickname", String.class);
+            String userId = claims.getPayload().get("userId", String.class);
 
             // 권한 부여
             UsernamePasswordAuthenticationToken authenticationToken =

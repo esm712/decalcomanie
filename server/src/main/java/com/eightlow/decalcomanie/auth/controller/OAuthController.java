@@ -193,8 +193,8 @@ public class OAuthController {
             HttpHeaders responseHeader = new HttpHeaders();
 
             Jws<Claims> claims = JwtUtils.parseToken(header.getFirst("refreshToken"), secretKey);
-            String userId = claims.getBody().get("userId", String.class);
-            String nickname = claims.getBody().get("nickname", String.class);
+            String userId = claims.getPayload().get("userId", String.class);
+            String nickname = claims.getPayload().get("nickname", String.class);
 
             String accessToken = jwtService.generateAccessToken(nickname, userId);
             String refreshToken = jwtService.generateRefreshToken(nickname, userId);

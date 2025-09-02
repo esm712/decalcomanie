@@ -30,7 +30,7 @@ public class JwtService {
 
     public boolean isValidToken(String refreshToken) {
         try {
-            String userId = JwtUtils.parseToken(refreshToken, secretKey).getBody().get("userId", String.class);
+            String userId = JwtUtils.parseToken(refreshToken, secretKey).getPayload().get("userId", String.class);
 
             String checkToken = oAuthRepository.findByUserId(userId).getRefreshToken();
             return refreshToken.equals(checkToken);
