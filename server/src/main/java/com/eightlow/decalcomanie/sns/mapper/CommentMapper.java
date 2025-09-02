@@ -4,11 +4,12 @@ import com.eightlow.decalcomanie.sns.dto.CommentDto;
 import com.eightlow.decalcomanie.sns.entity.Comment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CommentMapper {
     @Mapping(target = "article", ignore = true)
     @Mapping(target = "user", ignore = true)

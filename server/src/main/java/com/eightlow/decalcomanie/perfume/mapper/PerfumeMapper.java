@@ -7,13 +7,14 @@ import com.eightlow.decalcomanie.perfume.entity.Accord;
 import com.eightlow.decalcomanie.perfume.entity.NoteList;
 import com.eightlow.decalcomanie.perfume.entity.Perfume;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PerfumeMapper {
     Perfume toEntity(PerfumeDto perfumeDto);
 
