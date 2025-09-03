@@ -1,13 +1,13 @@
 package com.eightlow.decalcomanie.auth.jwt;
 
-import com.eightlow.decalcomanie.auth.service.JwtService;
 import io.jsonwebtoken.*;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -17,23 +17,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@RequiredArgsConstructor
+@Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final String secretKey;
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // 1. Authorization 헤더 가져오기
         final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+        // 2. 헤더가 없거나 "Bearer "로 시작하지 않으면 다음 필터로 이동
         if(authorization == null || !authorization.startsWith("Bearer ")) {
             logger.error("Authorization을 잘못 보냈습니다");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Token 꺼내기
+        // 3. 토큰 추출
         String token = authorization.split(" ")[1];
 
         try {
@@ -47,6 +49,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             // 상세정보 추가
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
             request.setAttribute("userId", userId);
