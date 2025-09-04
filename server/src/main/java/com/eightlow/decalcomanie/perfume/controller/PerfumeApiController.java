@@ -1,5 +1,6 @@
 package com.eightlow.decalcomanie.perfume.controller;
 
+import com.eightlow.decalcomanie.auth.security.CustomUserDetails;
 import com.eightlow.decalcomanie.perfume.dto.BrandDto;
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
 import com.eightlow.decalcomanie.perfume.dto.ScentDto;
@@ -12,9 +13,12 @@ import com.eightlow.decalcomanie.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +47,12 @@ public class PerfumeApiController {
 
     // 향수 상세보기
     @GetMapping("/detail/{perfumeId}")
-    public ResponseEntity<PerfumeDto> perfumeDetail(@PathVariable("perfumeId") int perfumeId, HttpServletRequest req) {
+    public ResponseEntity<PerfumeDto> perfumeDetail(@PathVariable("perfumeId") int perfumeId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         PerfumeDto perfumeDto = perfumeService.getPerfume(perfumeId);
 
         if(perfumeDto != null) {
             PerfumeDto pdto = perfumeDto.toBuilder()
-                    .picked(perfumeService.isPickedPerfume(perfumeId, (String)req.getAttribute("userId")))
+                    .picked(perfumeService.isPickedPerfume(perfumeId, userDetails.getUserId()))
                     .build();
             return new ResponseEntity<>(pdto, HttpStatus.OK);
         }
@@ -82,17 +86,16 @@ public class PerfumeApiController {
 
     // 향수 찜, 찜 해제
     @PostMapping("/pick")
-    public ResponseEntity<Map<String, Boolean>> pick(@RequestBody Map<String, Integer> request, HttpServletRequest req) {
+    public ResponseEntity<Map<String, Boolean>> pick(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody Map<String, Integer> request) {
         Map<String, Boolean> responseMap = new HashMap<>();
-        responseMap.put("isPicked", perfumeService.pickPerfume((String)req.getAttribute("userId"), request.get("perfumeId")));
-
+        responseMap.put("isPicked", perfumeService.pickPerfume(userDetails.getUserId(), request.get("perfumeId")));
         return new ResponseEntity<>(responseMap, HttpStatus.OK);
     }
 
     // 찜한 향수 보기
     @GetMapping("/picked")
-    public ResponseEntity<List<PerfumeDto>> picked(HttpServletRequest req) {
-        return new ResponseEntity<>(perfumeService.findAllPickedPerfume((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<PerfumeDto>> picked(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(perfumeService.findAllPickedPerfume(userDetails.getUserId()), HttpStatus.OK);
     }
 
     @GetMapping("/search/names")
@@ -101,15 +104,14 @@ public class PerfumeApiController {
     }
 
     @GetMapping("/today")
-    public ResponseEntity<DailyRecommendResponse> getTodaysPerfume(HttpServletRequest req) {
-        String userId = (String)req.getAttribute("userId");
-        return new ResponseEntity<>(perfumeService.recommendByOccasion(userId), HttpStatus.OK);
+    public ResponseEntity<DailyRecommendResponse> getTodaysPerfume(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(perfumeService.recommendByOccasion(userDetails.getUserId()), HttpStatus.OK);
     }
 
     @GetMapping("/recommend")
-    public ResponseEntity<List<PerfumeDto>> updateRecommendPerfume(HttpServletRequest req) {
-        userService.recommendUserPerfume((String)req.getAttribute("userId"));
-        return new ResponseEntity<>(userService.getUserPerfumeRecommend((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<PerfumeDto>> updateRecommendPerfume(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.recommendUserPerfume(userDetails.getUserId());
+        return new ResponseEntity<>(userService.getUserPerfumeRecommend(userDetails.getUserId()), HttpStatus.OK);
     }
 }
 

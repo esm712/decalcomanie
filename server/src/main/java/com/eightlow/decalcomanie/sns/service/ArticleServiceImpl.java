@@ -659,14 +659,6 @@ public class ArticleServiceImpl implements ArticleService {
         return false;
     }
 
-
-    // request로 부터 userId를 뽑아내는 공통메서드
-    @Override
-    public String getUserIdFromRequest(HttpServletRequest request) {
-        String userId = (String) request.getAttribute("userId");
-        return userId;
-    }
-
     // 피드 정보 조회 (사용자 정보, 글 정보, 포함된 향수 정보를 포함)
     @Override
     public List<FeedResponse> getFeedInfoForArticles(String userId, List<Article> articles, int datasize){

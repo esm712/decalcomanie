@@ -1,5 +1,6 @@
 package com.eightlow.decalcomanie.sns.controller;
 
+import com.eightlow.decalcomanie.auth.security.CustomUserDetails;
 import com.eightlow.decalcomanie.perfume.service.PerfumeService;
 import com.eightlow.decalcomanie.sns.dto.*;
 import com.eightlow.decalcomanie.sns.dto.request.CommentRequest;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,8 +41,9 @@ public class ArticleController {
 
     // 글 작성
     @PostMapping("/create")
-    public ResponseEntity<Map<String, String>> createArticle(@RequestBody @Valid CreateArticleRequest createArticleRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Map<String, String>> createArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                             @RequestBody @Valid CreateArticleRequest createArticleRequest) {
+        String userId = userDetails.getUserId();
         CreateArticleRequest createArticleReq = createArticleRequest.toBuilder().userId(userId).build();
         ArticleDto articleDto = articleDtoMapper.fromCreateArticleRequest(createArticleReq);
         int articleId = articleService.createArticle(articleDto);
@@ -78,8 +82,9 @@ public class ArticleController {
 
     // 글 상세 조회
     @GetMapping("/search/{articleId}")
-    public ResponseEntity<ArticleResponse> getDetailById(@PathVariable int articleId, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<ArticleResponse> getDetailById(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                         @PathVariable int articleId) {
+        String userId = userDetails.getUserId();
         ArticleResponse articleResponse = articleService.getDetail(articleId, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(articleResponse);
@@ -91,11 +96,12 @@ public class ArticleController {
 
     // 사용자가 쓴 글을 조회(내가 쓴글 조회)
     @PostMapping("/user")
-    public ResponseEntity<List<FeedResponse>> getArticleByUserId(@RequestBody FeedInquiryRequest feedInquiryRequest, HttpServletRequest req) {
+    public ResponseEntity<List<FeedResponse>> getArticleByUserId(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @RequestBody FeedInquiryRequest feedInquiryRequest) {
         String userId = feedInquiryRequest.getUserId();
 
         if(userId == null) {
-            userId = articleService.getUserIdFromRequest(req);
+            userId = userDetails.getUserId();
         }
 
         List<FeedResponse> responses  = articleService.getArticleByUserId(feedInquiryRequest, userId);
@@ -105,8 +111,9 @@ public class ArticleController {
 
     // 팔로워의 피드를 조희
     @PostMapping("/feed/following")
-    public ResponseEntity<List<FeedResponse>> getFollowingArticles(@RequestBody FeedInquiryRequest feedInquiryRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<List<FeedResponse>> getFollowingArticles(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                   @RequestBody FeedInquiryRequest feedInquiryRequest) {
+        String userId = userDetails.getUserId();
         // TODO: 사용자의 follower list를 받아와서 그 사용자들의 피드를 조회해야함 (정렬은 최신순으로)
         List<FeedResponse> responses  = articleService.getArticlesOfFollowingUser(feedInquiryRequest, userId);
 
@@ -115,17 +122,18 @@ public class ArticleController {
 
     // 피드 인기순 조회
     @PostMapping("/feed/popularity")
-    public ResponseEntity<List<FeedResponse>> getPopularArticles(@RequestBody @Valid FeedInquiryRequest feedInquiryRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
-
+    public ResponseEntity<List<FeedResponse>> getPopularArticles(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @RequestBody @Valid FeedInquiryRequest feedInquiryRequest) {
+        String userId = userDetails.getUserId();
         List<FeedResponse> responses  = articleService.getPopularArticles(feedInquiryRequest, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
     @PostMapping("/feed/latest")
-    public ResponseEntity<List<FeedResponse>> getLatestArticles(@RequestBody @Valid FeedInquiryRequest feedInquiryRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<List<FeedResponse>> getLatestArticles(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                @RequestBody @Valid FeedInquiryRequest feedInquiryRequest) {
+        String userId = userDetails.getUserId();
         List<FeedResponse> responses  = articleService.getLatestArticles(feedInquiryRequest, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responses);
@@ -133,10 +141,10 @@ public class ArticleController {
 
     // 향수별 피드 조회
     @PostMapping("/perfume/{perfumeId}")
-    public ResponseEntity<List<FeedResponse>> getPerfumeArticles(@PathVariable int perfumeId,
-                                                                 @RequestBody @Valid FeedInquiryRequest feedInquiryRequest,
-                                                                 HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<List<FeedResponse>> getPerfumeArticles(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @PathVariable int perfumeId,
+                                                                 @RequestBody @Valid FeedInquiryRequest feedInquiryRequest) {
+        String userId = userDetails.getUserId();
         List<FeedResponse> responses  = articleService.getArticleByPerfumeId(feedInquiryRequest, userId, perfumeId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responses);
@@ -146,9 +154,9 @@ public class ArticleController {
 
     // 글 수정
     @PutMapping("/update")
-    public ResponseEntity<Response> modifyArticle(@RequestBody @Valid
-                                                  UpdateArticleRequest updateArticleRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> modifyArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                  @RequestBody @Valid UpdateArticleRequest updateArticleRequest) {
+        String userId = userDetails.getUserId();
         UpdateArticleRequest updateArticleReq = updateArticleRequest.toBuilder().userId(userId).build();
         ArticleDto articleDto = articleDtoMapper.fromUpdateArticleRequest(updateArticleReq);
 
@@ -173,8 +181,9 @@ public class ArticleController {
 
     //글 삭제
     @DeleteMapping("/delete/{articleId}")
-    public ResponseEntity<Response> deleteArticle(@PathVariable int articleId, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> deleteArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                  @PathVariable int articleId) {
+        String userId = userDetails.getUserId();
         // 글 삭제
         int status = articleService.deleteArticle(userId, articleId);
 
@@ -193,8 +202,9 @@ public class ArticleController {
     /* 댓글 작업 part*/
     // 댓글 작성
     @PostMapping("/comment/create")
-    public ResponseEntity<List<CommentDto>> createComment(@RequestBody CommentRequest commentRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<List<CommentDto>> createComment(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                          @RequestBody CommentRequest commentRequest) {
+        String userId = userDetails.getUserId();
         CommentRequest creq = commentRequest.toBuilder()
                 .userId(userId)
                 .build();
@@ -211,8 +221,9 @@ public class ArticleController {
 
     // 댓글 수정
     @PutMapping("/comment/update")
-    public ResponseEntity<Response> updateComment(@RequestBody CommentRequest commentRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> updateComment(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                  @RequestBody CommentRequest commentRequest) {
+        String userId = userDetails.getUserId();
         CommentRequest creq = commentRequest.toBuilder()
                 .userId(userId)
                 .build();
@@ -222,8 +233,10 @@ public class ArticleController {
 
     // 댓글 삭제
     @DeleteMapping("/comment/delete/{commentId}")
-    public ResponseEntity<Response> deleteComment(@PathVariable int commentId,@RequestBody CommentRequest commentRequest, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> deleteComment(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                  @PathVariable int commentId,
+                                                  @RequestBody CommentRequest commentRequest) {
+        String userId = userDetails.getUserId();
         // 댓글 삭제
         int statusCode = articleService.deleteComment(commentId, userId);
         // 이미 없는 댓글의 경우 댓글수 감소 X
@@ -240,8 +253,9 @@ public class ArticleController {
     /* 피드 좋아요, 북마크 기능 파트*/
 
     @PostMapping("/like")
-    public ResponseEntity<Response> likeArticle(@RequestBody HeartDto heartDto, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> likeArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                @RequestBody HeartDto heartDto) {
+        String userId = userDetails.getUserId();
 
         HeartDto heart = heartDto.toBuilder()
                 .userId(userId)
@@ -252,24 +266,27 @@ public class ArticleController {
     }
 
     @PostMapping("/dislike")
-    public ResponseEntity<Response> dislikeArticle(@RequestBody HeartDto heartDto, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> dislikeArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                   @RequestBody HeartDto heartDto) {
+        String userId = userDetails.getUserId();
         HeartDto heart = heartDto.toBuilder().userId(userId).build();
         int status = articleService.dislikeArticle(heart);
         return resultMessage(status);
     }
 
     @PostMapping("/bookmark")
-    public ResponseEntity<Response> bookmarkArticle(@RequestBody BookMarkDto bookmarkDto, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> bookmarkArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                    @RequestBody BookMarkDto bookmarkDto) {
+        String userId = userDetails.getUserId();
         BookMarkDto bookmark = bookmarkDto.toBuilder().userId(userId).build();
         int status = articleService.bookmarkArticle(bookmark);
         return resultMessage(status);
     }
 
     @PostMapping("/cancelBookmark")
-    public ResponseEntity<Response> cancelBookmarkedArticle(@RequestBody BookMarkDto bookmarkDto, HttpServletRequest req) {
-        String userId = articleService.getUserIdFromRequest(req);
+    public ResponseEntity<Response> cancelBookmarkedArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                            @RequestBody BookMarkDto bookmarkDto) {
+        String userId = userDetails.getUserId();
         BookMarkDto bookmark = bookmarkDto.toBuilder().userId(userId).build();
         int status = articleService.cancelBookmarkArticle(bookmark);
         return resultMessage(status);

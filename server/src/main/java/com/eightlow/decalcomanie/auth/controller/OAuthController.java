@@ -5,6 +5,7 @@ import com.eightlow.decalcomanie.auth.dto.KakaoProfile;
 import com.eightlow.decalcomanie.auth.dto.LoginResponse;
 import com.eightlow.decalcomanie.auth.dto.OAuthToken;
 import com.eightlow.decalcomanie.auth.entity.UserCredential;
+import com.eightlow.decalcomanie.auth.security.CustomUserDetails;
 import com.eightlow.decalcomanie.auth.security.JwtUtils;
 import com.eightlow.decalcomanie.auth.service.OAuthService;
 import com.eightlow.decalcomanie.auth.service.JwtService;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -211,8 +213,8 @@ public class OAuthController {
     }
 
     @PostMapping("/signout")
-    public ResponseEntity signOut(HttpServletRequest request) {
-        oAuthService.signOut((String) request.getAttribute("userId"));
+    public ResponseEntity<?> signOut(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        oAuthService.signOut(userDetails.getUserId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

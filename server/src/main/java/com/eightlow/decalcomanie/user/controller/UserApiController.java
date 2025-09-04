@@ -1,6 +1,7 @@
 package com.eightlow.decalcomanie.user.controller;
 
 import com.eightlow.decalcomanie.auth.entity.UserCredential;
+import com.eightlow.decalcomanie.auth.security.CustomUserDetails;
 import com.eightlow.decalcomanie.auth.service.JwtService;
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
 import com.eightlow.decalcomanie.perfume.dto.ScentDto;
@@ -17,6 +18,7 @@ import com.eightlow.decalcomanie.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -47,64 +49,64 @@ public class UserApiController {
 
     // 사용자 향수 등록
     @PostMapping("/perfume/register")
-    public ResponseEntity<String> registerUserPerfume(@RequestBody Map<String, Integer> request, HttpServletRequest req) {
-        String userMessage = userService.registerUserPerfume((String)req.getAttribute("userId"), request.get("perfumeId"));
+    public ResponseEntity<String> registerUserPerfume(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody Map<String, Integer> request) {
+        String userMessage = userService.registerUserPerfume(userDetails.getUserId(), request.get("perfumeId"));
         return new ResponseEntity<>(userMessage, HttpStatus.CREATED);
     }
 
     // 사용자 향수 삭제
     @PostMapping("/perfume/delete")
-    public ResponseEntity<String> deleteUserPerfume(@RequestBody Map<String, Integer> request, HttpServletRequest req) {
-        String userMessage = userService.deleteUserPerfume((String)req.getAttribute("userId"), request.get("perfumeId"));
+    public ResponseEntity<String> deleteUserPerfume(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody Map<String, Integer> request) {
+        String userMessage = userService.deleteUserPerfume(userDetails.getUserId(), request.get("perfumeId"));
         return new ResponseEntity<>(userMessage, HttpStatus.CREATED);
     }
 
     // 사용자 향 TOP 3 조회
     @GetMapping("/scent/top")
-    public ResponseEntity<List<ScentDto>> getTopThreeScent(HttpServletRequest req){
-        return new ResponseEntity<>(userService.getTopThreeScent((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<ScentDto>> getTopThreeScent(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(userService.getTopThreeScent(userDetails.getUserId()), HttpStatus.OK);
     }
 
     // 사용자 향수 조회
     @GetMapping("/perfume")
-    public ResponseEntity<List<PerfumeDto>> getUserPerfume(HttpServletRequest req) {
-        return new ResponseEntity<>(userService.getUserPerfume((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<PerfumeDto>> getUserPerfume(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(userService.getUserPerfume(userDetails.getUserId()), HttpStatus.OK);
     }
 
     // 팔로우
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(@RequestBody Map<String, String> request, HttpServletRequest req) {
-        return new ResponseEntity<>(userService.follow((String)req.getAttribute("userId"), request.get("to")), HttpStatus.CREATED);
+    public ResponseEntity<String> followUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody Map<String, String> request) {
+        return new ResponseEntity<>(userService.follow(userDetails.getUserId(), request.get("to")), HttpStatus.CREATED);
     }
 
     // 언팔로우
     @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowUser(@RequestBody Map<String, String> request, HttpServletRequest req) {
-        return new ResponseEntity<>(userService.unfollow((String)req.getAttribute("userId"), request.get("to")), HttpStatus.CREATED);
+    public ResponseEntity<String> unfollowUser(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody Map<String, String> request) {
+        return new ResponseEntity<>(userService.unfollow(userDetails.getUserId(), request.get("to")), HttpStatus.CREATED);
     }
 
     // 팔로잉 목록 조회
     @GetMapping("/following")
-    public ResponseEntity<List<FollowingResponse>> getFollowingUsers(HttpServletRequest req) {
-        return new ResponseEntity<>(userService.getFollowingUsers((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<FollowingResponse>> getFollowingUsers(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(userService.getFollowingUsers(userDetails.getUserId()), HttpStatus.OK);
     }
 
     // 팔로우 목록 조회
     @GetMapping("/follower")
-    public ResponseEntity<List<FollowerResponse>> getFollowers(HttpServletRequest req) {
-        return new ResponseEntity<>(userService.getFollowers((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<FollowerResponse>> getFollowers(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(userService.getFollowers(userDetails.getUserId()), HttpStatus.OK);
     }
 
     // 다른 유저의 팔로잉 목록 조회
     @GetMapping("/following/{userId}")
-    public ResponseEntity<CommonResponse> getOtherFollowingUsers(@PathVariable String userId, HttpServletRequest req) {
+    public ResponseEntity<CommonResponse> getOtherFollowingUsers(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String userId) {
         UserInfoDto userInfoDto = userService.getUserInfo(userId).toBuilder()
-                .isMe(userId.equals((String)req.getAttribute("userId")))
+                .isMe(userId.equals(userDetails.getUserId()))
                 .build();
 
         CommonResponse response = CommonResponse.builder()
                 .targetUser(userInfoDto)
-                .data(userService.getOtherFollowingUsers(userId, (String)req.getAttribute("userId")))
+                .data(userService.getOtherFollowingUsers(userId, userDetails.getUserId()))
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -112,14 +114,14 @@ public class UserApiController {
 
     // 다른 유저의 팔로우 목록 조회
     @GetMapping("/follower/{userId}")
-    public ResponseEntity<CommonResponse> getOtherFollowers(@PathVariable String userId, HttpServletRequest req) {
+    public ResponseEntity<CommonResponse> getOtherFollowers(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String userId) {
         UserInfoDto userInfoDto = userService.getUserInfo(userId).toBuilder()
-                .isMe(userId.equals((String)req.getAttribute("userId")))
+                .isMe(userId.equals(userDetails.getUserId()))
                 .build();
 
         CommonResponse response = CommonResponse.builder()
                 .targetUser(userInfoDto)
-                .data(userService.getOtherFollowers(userId, (String)req.getAttribute("userId")))
+                .data(userService.getOtherFollowers(userId, userDetails.getUserId()))
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -127,8 +129,8 @@ public class UserApiController {
 
     // 사용자 개인 추천 향수
     @GetMapping("/recommend")
-    public ResponseEntity<List<PerfumeDto>> recommend(HttpServletRequest req) {
-        return new ResponseEntity<>(userService.getUserPerfumeRecommend((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<List<PerfumeDto>> recommend(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(userService.getUserPerfumeRecommend(userDetails.getUserId()), HttpStatus.OK);
     }
 
 
@@ -141,9 +143,9 @@ public class UserApiController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Map<String, String>> updateUserInfo(@RequestBody UserInfoUpdateRequest request, HttpServletRequest req) {
+    public ResponseEntity<Map<String, String>> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody UserInfoUpdateRequest request) {
         Map<String, String> responseMap = new HashMap<>();
-        String userId = (String)req.getAttribute("userId");
+        String userId = userDetails.getUserId();
         String updatedNickname = userService.updateUserInfo(request, userId);
         responseMap.put("nickname", updatedNickname);
 
@@ -157,13 +159,13 @@ public class UserApiController {
     }
 
     @GetMapping("/info")
-    public ResponseEntity<UserInfoDto> getUserInfo(HttpServletRequest req) {
-        return new ResponseEntity<>(userService.getUserInfo((String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<UserInfoDto> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return new ResponseEntity<>(userService.getUserInfo(userDetails.getUserId()), HttpStatus.OK);
     }
 
     @DeleteMapping("/withdrawal")
-    public ResponseEntity<String> withdrawUser(HttpServletRequest req) {
-        UserCredential userCredential = em.find(UserCredential.class, req.getAttribute("userId"));
+    public ResponseEntity<String> withdrawUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserCredential userCredential = em.find(UserCredential.class, userDetails.getUserId());
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -185,21 +187,21 @@ public class UserApiController {
             e.printStackTrace();
         }
 
-        userService.withdrawUser((String)req.getAttribute("userId"));
+        userService.withdrawUser(userDetails.getUserId());
 
         return new ResponseEntity<>("회원 탈퇴 완료!", HttpStatus.OK);
     }
 
     @PostMapping("/bookmark")
-    public ResponseEntity<List<FeedResponse>> getBookmark(@RequestBody @Valid FeedInquiryRequest feedInquiryRequest,
-                                                          HttpServletRequest req){
-        List<FeedResponse> responses  = articleService.getBookmarkArticle(feedInquiryRequest, (String)req.getAttribute("userId"));
+    public ResponseEntity<List<FeedResponse>> getBookmark(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                          @RequestBody @Valid FeedInquiryRequest feedInquiryRequest){
+        List<FeedResponse> responses  = articleService.getBookmarkArticle(feedInquiryRequest, userDetails.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<ProfileResponse> getProfile(@PathVariable String userId, HttpServletRequest req) {
-        return new ResponseEntity<>(userService.getUserProfile(userId, (String)req.getAttribute("userId")), HttpStatus.OK);
+    public ResponseEntity<ProfileResponse> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String userId) {
+        return new ResponseEntity<>(userService.getUserProfile(userId, userDetails.getUserId()), HttpStatus.OK);
     }
 
 }
