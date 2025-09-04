@@ -1,16 +1,10 @@
 package com.eightlow.decalcomanie.common.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import java.util.List;
 
-import com.eightlow.decalcomanie.common.dto.BaseDto;
-import com.eightlow.decalcomanie.common.entity.BaseEntity;
-
-@Mapper(componentModel = "spring")
-public interface BaseMapper {
-    BaseMapper instance = Mappers.getMapper(BaseMapper.class);
-
-    BaseEntity dtoToEntity(BaseDto baseDto);
-
-    BaseDto entityToDto(BaseEntity baseEntity);
+public interface BaseMapper<E, D> {
+    D toDto(E entity);
+    E toEntity(D dto);
+    List<D> toDtoList(List<E> entities);
+    List<E> toEntityList(List<D> dtos);
 }

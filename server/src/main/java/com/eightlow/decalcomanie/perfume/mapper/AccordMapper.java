@@ -1,20 +1,25 @@
 package com.eightlow.decalcomanie.perfume.mapper;
 
+import com.eightlow.decalcomanie.common.mapper.BaseMapper;
 import com.eightlow.decalcomanie.perfume.dto.AccordDto;
 import com.eightlow.decalcomanie.perfume.entity.Accord;
 import org.mapstruct.Mapper;
-import org.springframework.stereotype.Component;
+import org.mapstruct.MapperConfig;
 
 import java.util.List;
 
-@Component
-@Mapper(componentModel = "spring")
-public interface AccordMapper {
-    Accord toEntity(AccordDto accordDto);
-
+@Mapper(config = MapperConfig.class)
+public interface AccordMapper extends BaseMapper<Accord, AccordDto> {
+    @Override
     AccordDto toDto(Accord accord);
 
-    List<Accord> toEntity(List<AccordDto> accordDtoList);
+    @Override
+    Accord toEntity(AccordDto accordDto);
 
-    List<AccordDto> toDto(List<Accord> accordList);
+    @Override
+    List<AccordDto> toDtoList(List<Accord> accords);
+
+    @Override
+    List<Accord> toEntityList(List<AccordDto> accordDtos);
+
 }

@@ -1,5 +1,7 @@
 package com.eightlow.decalcomanie.perfume.mapper;
 
+import com.eightlow.decalcomanie.common.mapper.BaseMapper;
+import com.eightlow.decalcomanie.common.mapper.MapStructConfig;
 import com.eightlow.decalcomanie.perfume.dto.NoteListDto;
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
 import com.eightlow.decalcomanie.perfume.dto.ScentDto;
@@ -7,61 +9,14 @@ import com.eightlow.decalcomanie.perfume.entity.Accord;
 import com.eightlow.decalcomanie.perfume.entity.NoteList;
 import com.eightlow.decalcomanie.perfume.entity.Perfume;
 import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface PerfumeMapper {
-    Perfume toEntity(PerfumeDto perfumeDto);
+@Mapper(config = MapStructConfig.class)
+public interface PerfumeMapper extends BaseMapper<Perfume, PerfumeDto> {
 
-    List<Perfume> toEntity(List<PerfumeDto> perfumeDtoList);
-
-    default List<PerfumeDto> toDto(List<Perfume> perfumeList) {
-        List<PerfumeDto> perfumeDtoList = new ArrayList<>();
-
-        for (Perfume perfume : perfumeList) {
-           perfumeDtoList.add(toSimpleDto(perfume));
-        }
-
-        return perfumeDtoList;
-    }
-
-    default PerfumeDto toSimpleDto(Perfume perfume) {
-        List<ScentDto> accords = new ArrayList<>();
-
-        if(perfume.getAccord() != null) {
-            for (Accord a : perfume.getAccord()) {
-                ScentDto sdto = ScentDto.builder()
-                        .weight(a.getWeight())
-                        .rgb(a.getScent().getRgb())
-                        .scentId(a.getScent().getScentId())
-                        .nameOrg(a.getScent().getNameOrg())
-                        .name(a.getScent().getName())
-                        .build();
-
-                accords.add(sdto);
-            }
-        }
-
-        PerfumeDto pdto = PerfumeDto.builder()
-                .perfumeId(perfume.getPerfumeId())
-                .nameOrg(perfume.getNameOrg())
-                .name(perfume.getName())
-                .brandNameOrg(perfume.getBrand().getNameOrg())
-                .brandName(perfume.getBrand().getName())
-                .picture(perfume.getPicture())
-                .pick(perfume.getPick())
-                .rate(perfume.getRate())
-                .accord(accords)
-                .build();
-
-        return pdto;
-    }
-
+    @Override
     default PerfumeDto toDto(Perfume perfume) {
         List<ScentDto> accords = new ArrayList<>();
         List<NoteListDto> noteListDtoList = new ArrayList<>();
@@ -119,4 +74,49 @@ public interface PerfumeMapper {
 
         return pdto;
     }
+
+    @Override
+    default List<PerfumeDto> toDtoList(List<Perfume> perfumeList) {
+        List<PerfumeDto> perfumeDtoList = new ArrayList<>();
+
+        for (Perfume perfume : perfumeList) {
+           perfumeDtoList.add(toSimpleDto(perfume));
+        }
+
+        return perfumeDtoList;
+    }
+
+    default PerfumeDto toSimpleDto(Perfume perfume) {
+        List<ScentDto> accords = new ArrayList<>();
+
+        if(perfume.getAccord() != null) {
+            for (Accord a : perfume.getAccord()) {
+                ScentDto sdto = ScentDto.builder()
+                        .weight(a.getWeight())
+                        .rgb(a.getScent().getRgb())
+                        .scentId(a.getScent().getScentId())
+                        .nameOrg(a.getScent().getNameOrg())
+                        .name(a.getScent().getName())
+                        .build();
+
+                accords.add(sdto);
+            }
+        }
+
+        PerfumeDto pdto = PerfumeDto.builder()
+                .perfumeId(perfume.getPerfumeId())
+                .nameOrg(perfume.getNameOrg())
+                .name(perfume.getName())
+                .brandNameOrg(perfume.getBrand().getNameOrg())
+                .brandName(perfume.getBrand().getName())
+                .picture(perfume.getPicture())
+                .pick(perfume.getPick())
+                .rate(perfume.getRate())
+                .accord(accords)
+                .build();
+
+        return pdto;
+    }
+
+
 }

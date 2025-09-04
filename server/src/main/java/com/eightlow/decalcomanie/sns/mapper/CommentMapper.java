@@ -1,23 +1,19 @@
 package com.eightlow.decalcomanie.sns.mapper;
 
+import com.eightlow.decalcomanie.common.mapper.BaseMapper;
+import com.eightlow.decalcomanie.common.mapper.MapStructConfig;
 import com.eightlow.decalcomanie.sns.dto.CommentDto;
 import com.eightlow.decalcomanie.sns.entity.Comment;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface CommentMapper {
-    @Mapping(target = "article", ignore = true)
-    @Mapping(target = "user", ignore = true)
-    Comment toEntity(CommentDto commentDTO);
+@Mapper(config = MapStructConfig.class)
+public interface CommentMapper extends BaseMapper<Comment, CommentDto> {
 
-    List<CommentDto> toDTO(List<Comment> comments);
-
-    default List<CommentDto> toDTOs(List<Comment> comments) {
+    @Override
+    default List<CommentDto> toDtoList(List<Comment> comments) {
         List<CommentDto> dtos = new ArrayList<>();
         for (Comment comment : comments) {
             CommentDto commentDto = CommentDto.builder()
@@ -28,7 +24,6 @@ public interface CommentMapper {
                     .createdAt(comment.getCreatedAt())
                     .updatedAt(comment.getUpdatedAt())
                     .build();
-
             dtos.add(commentDto);
         }
         return dtos;

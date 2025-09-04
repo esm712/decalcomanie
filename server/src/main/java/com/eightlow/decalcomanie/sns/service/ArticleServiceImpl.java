@@ -468,7 +468,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public List<CommentDto> getComments(int articleId) {
         List<Comment> comments = commentRepository.findByArticle_ArticleId(articleId);
-        return commentMapper.toDTOs(comments);
+        return commentMapper.toDtoList(comments);
     }
 
     @Override

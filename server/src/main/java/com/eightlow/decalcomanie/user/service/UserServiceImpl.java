@@ -464,12 +464,14 @@ public class UserServiceImpl implements UserService {
 
         List<UserPerfume> userPerfumes = userPerfumeRepository.findByUser_UserId(userId);
 
-        List<PerfumeDto> unpossessedPerfumes = perfumeMapper.toDto(queryFactory.
-                selectFrom(perfume)
+        List<Perfume> perfumes = queryFactory
+                .selectFrom(perfume)
                 .where(
                         userPerfumeEq(userPerfumes)
                 )
-                .fetch());
+                .fetch();
+
+        List<PerfumeDto> unpossessedPerfumes = perfumeMapper.toDtoList(perfumes);
 
         for(PerfumeDto perfumeDto : unpossessedPerfumes){
             Map<ScentDto, Double> scentPercent = calculate(perfumeDto);

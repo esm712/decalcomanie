@@ -62,13 +62,13 @@ public class PerfumeServiceImpl implements PerfumeService {
     // 전체 브랜드 조회
     @Override
     public List<BrandDto> findAllBrand() {
-        return brandMapper.toDto(brandRepository.findAll());
+        return brandMapper.toDtoList(brandRepository.findAll());
     }
 
     // 전체 향 조회
     @Override
     public List<ScentDto> findAllScent() {
-        return scentMapper.toDto(scentRepository.findAll());
+        return scentMapper.toDtoList(scentRepository.findAll());
     }
 
     // 검색 조건에 맞는 향수 조회
@@ -89,7 +89,7 @@ public class PerfumeServiceImpl implements PerfumeService {
                 .limit(condition.getDataSize() == null ? 50 : condition.getDataSize())
                 .fetch();
 
-        return perfumeMapper.toDto(searchResult);
+        return perfumeMapper.toDtoList(searchResult);
     }
 
     // 향수 찜
@@ -233,10 +233,10 @@ public class PerfumeServiceImpl implements PerfumeService {
         Collections.sort(overall, Comparator.comparing(Perfume :: getPick).reversed());
 
         return DailyRecommendResponse.builder()
-                .season(perfumeMapper.toDto(season))
-                .dayNight(perfumeMapper.toDto(dayNight))
-                .ageGender(perfumeMapper.toDto(ageGender))
-                .overall(perfumeMapper.toDto(overall))
+                .season(perfumeMapper.toDtoList(season))
+                .dayNight(perfumeMapper.toDtoList(dayNight))
+                .ageGender(perfumeMapper.toDtoList(ageGender))
+                .overall(perfumeMapper.toDtoList(overall))
                 .age(loginUser.getAge())
                 .gender(loginUser.getGender())
                 .curSeason(getSeason(today))

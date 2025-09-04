@@ -1,20 +1,11 @@
 package com.eightlow.decalcomanie.perfume.mapper;
 
+import com.eightlow.decalcomanie.common.mapper.BaseMapper;
 import com.eightlow.decalcomanie.perfume.dto.NoteDto;
 import com.eightlow.decalcomanie.perfume.entity.Note;
 import org.mapstruct.Mapper;
-import org.springframework.stereotype.Component;
+import org.mapstruct.MapperConfig;
 
-import java.util.List;
-
-@Component
-@Mapper(componentModel = "spring")
-public interface NoteMapper {
-    Note toEntity(NoteDto noteDto);
-
-    NoteDto toDto(Note note);
-
-    List<Note> toEntity(List<NoteDto> noteDtoList);
-
-    List<NoteDto> toDto(List<Note> noteList);
+@Mapper(config = MapperConfig.class)
+public interface NoteMapper extends BaseMapper<Note, NoteDto> {
 }
