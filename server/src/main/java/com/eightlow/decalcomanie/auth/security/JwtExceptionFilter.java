@@ -1,8 +1,7 @@
-package com.eightlow.decalcomanie.auth.jwt;
+package com.eightlow.decalcomanie.auth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
-import org.aspectj.bridge.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

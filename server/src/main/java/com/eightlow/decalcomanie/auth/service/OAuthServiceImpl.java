@@ -1,8 +1,7 @@
-package com.eightlow.decalcomanie.auth.service.implement;
+package com.eightlow.decalcomanie.auth.service;
 
 import com.eightlow.decalcomanie.auth.entity.UserCredential;
-import com.eightlow.decalcomanie.auth.respository.OAuthRepository;
-import com.eightlow.decalcomanie.auth.service.IOAuthService;
+import com.eightlow.decalcomanie.auth.repository.OAuthRepository;
 import com.eightlow.decalcomanie.common.exception.CustomErrorCode;
 import com.eightlow.decalcomanie.common.exception.CustomException;
 import com.eightlow.decalcomanie.user.entity.User;
@@ -13,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class OAuthServiceImpl implements IOAuthService {
+public class OAuthServiceImpl implements OAuthService {
 
     private final OAuthRepository oAuthRepository;
     private final UserRepository userRepository;

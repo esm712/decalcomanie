@@ -1,10 +1,9 @@
-package com.eightlow.decalcomanie.sns.service.implement;
+package com.eightlow.decalcomanie.sns.service;
 
 import com.eightlow.decalcomanie.perfume.entity.Perfume;
 import com.eightlow.decalcomanie.sns.entity.Article;
 import com.eightlow.decalcomanie.sns.entity.ArticlePerfume;
 import com.eightlow.decalcomanie.sns.repository.ArticlePerfumeRepository;
-import com.eightlow.decalcomanie.sns.service.IGradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @Slf4j
-public class GradeServiceImpl implements IGradeService {
+public class GradeServiceImpl implements GradeService {
 
     private final ArticlePerfumeRepository articlePerfumeRepository;
     private final EntityManager entityManager;

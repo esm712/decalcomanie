@@ -1,4 +1,4 @@
-package com.eightlow.decalcomanie.sns.service.implement;
+package com.eightlow.decalcomanie.sns.service;
 
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
 import com.eightlow.decalcomanie.perfume.dto.ScentDto;
@@ -13,13 +13,12 @@ import com.eightlow.decalcomanie.sns.dto.response.Response;
 import com.eightlow.decalcomanie.sns.entity.*;
 import com.eightlow.decalcomanie.sns.mapper.*;
 import com.eightlow.decalcomanie.sns.repository.*;
-import com.eightlow.decalcomanie.sns.service.IArticleService;
 import com.eightlow.decalcomanie.user.dto.UserInfoDto;
 import com.eightlow.decalcomanie.user.dto.response.FollowingResponse;
 import com.eightlow.decalcomanie.user.entity.User;
 import com.eightlow.decalcomanie.user.entity.UserScent;
 import com.eightlow.decalcomanie.user.mapper.UserMapper;
-import com.eightlow.decalcomanie.user.service.IUserService;
+import com.eightlow.decalcomanie.user.service.UserService;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -45,9 +44,9 @@ import static com.eightlow.decalcomanie.sns.entity.QBookMark.bookMark;
 @Service
 @Transactional(readOnly = true)
 @Slf4j
-public class ArticleServiceImpl implements IArticleService {
+public class ArticleServiceImpl implements ArticleService {
 
-    private final IUserService userService;
+    private final UserService userService;
     private final ArticleRepository articleRepository;
     private final ArticlePerfumeRepository articlePerfumeRepository;
     private final CommentRepository commentRepository;

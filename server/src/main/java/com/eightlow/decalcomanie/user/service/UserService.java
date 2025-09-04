@@ -10,7 +10,7 @@ import com.eightlow.decalcomanie.user.dto.response.ProfileResponse;
 
 import java.util.List;
 
-public interface IUserService {
+public interface UserService {
 
     // 사용자 보유 향수 등록
     String registerUserPerfume(String userId, Integer perfumeId);

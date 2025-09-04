@@ -1,4 +1,4 @@
-package com.eightlow.decalcomanie.auth.jwt;
+package com.eightlow.decalcomanie.auth.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

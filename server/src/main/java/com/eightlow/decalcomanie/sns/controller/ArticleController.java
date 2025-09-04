@@ -1,6 +1,6 @@
 package com.eightlow.decalcomanie.sns.controller;
 
-import com.eightlow.decalcomanie.perfume.service.IPerfumeService;
+import com.eightlow.decalcomanie.perfume.service.PerfumeService;
 import com.eightlow.decalcomanie.sns.dto.*;
 import com.eightlow.decalcomanie.sns.dto.request.CommentRequest;
 import com.eightlow.decalcomanie.sns.dto.request.CreateArticleRequest;
@@ -11,8 +11,8 @@ import com.eightlow.decalcomanie.sns.dto.response.FeedResponse;
 import com.eightlow.decalcomanie.sns.dto.response.Response;
 import com.eightlow.decalcomanie.sns.mapper.ArticleDtoMapper;
 import com.eightlow.decalcomanie.sns.mapper.CommentDtoMapper;
-import com.eightlow.decalcomanie.sns.service.IArticleService;
-import com.eightlow.decalcomanie.sns.service.IGradeService;
+import com.eightlow.decalcomanie.sns.service.ArticleService;
+import com.eightlow.decalcomanie.sns.service.GradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,9 +29,9 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class ArticleController {
-    private final IArticleService articleService;
-    private final IGradeService gradeService;
-    private final IPerfumeService perfumeService;
+    private final ArticleService articleService;
+    private final GradeService gradeService;
+    private final PerfumeService perfumeService;
 
     private final ArticleDtoMapper articleDtoMapper;
     private final CommentDtoMapper commentDtoMapper;
@@ -217,8 +217,7 @@ public class ArticleController {
                 .userId(userId)
                 .build();
         CommentDto commentDto = commentDtoMapper.fromCommentRequest(creq);
-        ResponseEntity<Response> response = articleService.updateComment(commentDto);
-        return response;
+        return articleService.updateComment(commentDto);
     }
 
     // 댓글 삭제

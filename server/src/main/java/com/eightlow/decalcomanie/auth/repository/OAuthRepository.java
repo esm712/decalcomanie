@@ -1,4 +1,4 @@
-package com.eightlow.decalcomanie.auth.respository;
+package com.eightlow.decalcomanie.auth.repository;
 
 import com.eightlow.decalcomanie.auth.entity.UserCredential;
 import org.springframework.data.jpa.repository.JpaRepository;

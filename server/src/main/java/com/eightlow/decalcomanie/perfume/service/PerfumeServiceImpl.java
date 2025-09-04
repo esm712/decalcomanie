@@ -1,4 +1,4 @@
-package com.eightlow.decalcomanie.perfume.service.implement;
+package com.eightlow.decalcomanie.perfume.service;
 
 import com.eightlow.decalcomanie.common.exception.CustomErrorCode;
 import com.eightlow.decalcomanie.common.exception.CustomException;
@@ -9,18 +9,16 @@ import com.eightlow.decalcomanie.perfume.dto.response.PerfumeNameResponse;
 import com.eightlow.decalcomanie.perfume.entity.*;
 import com.eightlow.decalcomanie.perfume.mapper.*;
 import com.eightlow.decalcomanie.perfume.repository.*;
-import com.eightlow.decalcomanie.perfume.service.IPerfumeService;
 import com.eightlow.decalcomanie.sns.dto.PerfumeRateDto;
 import com.eightlow.decalcomanie.user.entity.QUser;
 import com.eightlow.decalcomanie.user.entity.User;
-import com.eightlow.decalcomanie.user.service.IUserService;
+import com.eightlow.decalcomanie.user.service.UserService;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -35,13 +33,13 @@ import static com.eightlow.decalcomanie.perfume.entity.QPerfume.perfume;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PerfumeServiceImpl implements IPerfumeService {
+public class PerfumeServiceImpl implements PerfumeService {
     private final BrandRepository brandRepository;
     private final ScentRepository scentRepository;
     private final AccordRepository accordRepository;
     private final PerfumePickRepository perfumePickRepository;
     private final PerfumeMapper perfumeMapper;
-    private final IUserService userService;
+    private final UserService userService;
     private final BrandMapper brandMapper;
     private final ScentMapper scentMapper;
     private final JPAQueryFactory queryFactory;

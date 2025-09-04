@@ -7,16 +7,14 @@ import com.eightlow.decalcomanie.sns.dto.response.FeedResponse;
 import com.eightlow.decalcomanie.sns.dto.response.Response;
 import com.eightlow.decalcomanie.sns.entity.Article;
 import com.eightlow.decalcomanie.sns.entity.ArticlePerfume;
-import com.eightlow.decalcomanie.sns.entity.Comment;
 import org.springframework.http.ResponseEntity;
 
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-public interface IArticleService {
+public interface ArticleService {
     /*
             글(피드) 부분
      */

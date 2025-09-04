@@ -1,6 +1,6 @@
-package com.eightlow.decalcomanie.user.service.implement;
+package com.eightlow.decalcomanie.user.service;
 
-import com.eightlow.decalcomanie.auth.respository.OAuthRepository;
+import com.eightlow.decalcomanie.auth.repository.OAuthRepository;
 import com.eightlow.decalcomanie.common.exception.CustomErrorCode;
 import com.eightlow.decalcomanie.common.exception.CustomException;
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
@@ -23,7 +23,6 @@ import com.eightlow.decalcomanie.user.dto.response.ProfileResponse;
 import com.eightlow.decalcomanie.user.entity.*;
 import com.eightlow.decalcomanie.user.mapper.UserMapper;
 import com.eightlow.decalcomanie.user.repository.*;
-import com.eightlow.decalcomanie.user.service.IUserService;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ import static com.eightlow.decalcomanie.user.entity.QUserPerfumeRecommend.userPe
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class UserServiceImpl implements IUserService {
+public class UserServiceImpl implements UserService {
     private final UserPerfumeRepository userPerfumeRepository;
     private final FollowRepository followRepository;
     private final UserScentRepository userScentRepository;

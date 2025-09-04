@@ -1,8 +1,7 @@
 package com.eightlow.decalcomanie.common.config;
 
-import com.eightlow.decalcomanie.auth.jwt.JwtExceptionFilter;
-import com.eightlow.decalcomanie.auth.jwt.JwtFilter;
-import com.eightlow.decalcomanie.auth.service.JwtService;
+import com.eightlow.decalcomanie.auth.security.JwtExceptionFilter;
+import com.eightlow.decalcomanie.auth.security.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,9 +25,6 @@ public class SecurityConfig {
 
     private final JwtExceptionFilter jwtExceptionFilter;
     private final CorsFilter corsFilter;
-
-    @Value("${jwt.secret}")
-    private String secretKey;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {

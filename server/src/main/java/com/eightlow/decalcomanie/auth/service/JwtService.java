@@ -1,7 +1,7 @@
 package com.eightlow.decalcomanie.auth.service;
 
-import com.eightlow.decalcomanie.auth.jwt.JwtUtils;
-import com.eightlow.decalcomanie.auth.respository.OAuthRepository;
+import com.eightlow.decalcomanie.auth.security.JwtUtils;
+import com.eightlow.decalcomanie.auth.repository.OAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

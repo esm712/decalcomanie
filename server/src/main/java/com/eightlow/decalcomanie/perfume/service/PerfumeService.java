@@ -10,12 +10,12 @@ import com.eightlow.decalcomanie.sns.dto.PerfumeRateDto;
 
 import java.util.List;
 
-public interface IPerfumeService {
-    public PerfumeDto getPerfume(int perfumeId);
+public interface PerfumeService {
+    PerfumeDto getPerfume(int perfumeId);
 
-    public List<BrandDto> findAllBrand();
+    List<BrandDto> findAllBrand();
 
-    public List<ScentDto> findAllScent();
+    List<ScentDto> findAllScent();
 
     List<PerfumeDto> findMatchingPerfumes(PerfumeSearchRequest condition);
 

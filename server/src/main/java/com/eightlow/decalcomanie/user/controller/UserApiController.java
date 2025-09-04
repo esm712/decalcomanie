@@ -1,22 +1,19 @@
 package com.eightlow.decalcomanie.user.controller;
 
-import com.eightlow.decalcomanie.auth.dto.OAuthToken;
 import com.eightlow.decalcomanie.auth.entity.UserCredential;
 import com.eightlow.decalcomanie.auth.service.JwtService;
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
 import com.eightlow.decalcomanie.perfume.dto.ScentDto;
 import com.eightlow.decalcomanie.sns.dto.request.FeedInquiryRequest;
 import com.eightlow.decalcomanie.sns.dto.response.FeedResponse;
-import com.eightlow.decalcomanie.sns.service.IArticleService;
+import com.eightlow.decalcomanie.sns.service.ArticleService;
 import com.eightlow.decalcomanie.user.dto.UserInfoDto;
 import com.eightlow.decalcomanie.user.dto.request.UserInfoUpdateRequest;
 import com.eightlow.decalcomanie.user.dto.response.CommonResponse;
 import com.eightlow.decalcomanie.user.dto.response.FollowerResponse;
 import com.eightlow.decalcomanie.user.dto.response.FollowingResponse;
 import com.eightlow.decalcomanie.user.dto.response.ProfileResponse;
-import com.eightlow.decalcomanie.user.service.IUserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.eightlow.decalcomanie.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -28,12 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +37,9 @@ import java.util.Map;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class UserApiController {
 
-    private final IUserService userService;
+    private final UserService userService;
     private final JwtService jwtService;
-    private final IArticleService articleService;
+    private final ArticleService articleService;
     private final EntityManager em;
 
     @Value("${spring.kakao.admin-key}")

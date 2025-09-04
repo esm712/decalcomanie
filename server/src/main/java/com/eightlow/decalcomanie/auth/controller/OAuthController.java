@@ -5,8 +5,8 @@ import com.eightlow.decalcomanie.auth.dto.KakaoProfile;
 import com.eightlow.decalcomanie.auth.dto.LoginResponse;
 import com.eightlow.decalcomanie.auth.dto.OAuthToken;
 import com.eightlow.decalcomanie.auth.entity.UserCredential;
-import com.eightlow.decalcomanie.auth.jwt.JwtUtils;
-import com.eightlow.decalcomanie.auth.service.IOAuthService;
+import com.eightlow.decalcomanie.auth.security.JwtUtils;
+import com.eightlow.decalcomanie.auth.service.OAuthService;
 import com.eightlow.decalcomanie.auth.service.JwtService;
 import com.eightlow.decalcomanie.user.dto.UserDto;
 import com.eightlow.decalcomanie.user.mapper.UserMapper;
@@ -34,7 +34,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/oauth")
 public class OAuthController {
-    private final IOAuthService oAuthService;
+    private final OAuthService oAuthService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final UserMapper userMapper;
@@ -188,7 +188,7 @@ public class OAuthController {
     }
 
     @GetMapping("/reissue")
-    public ResponseEntity<String> reissue(@RequestHeader HttpHeaders header, HttpServletResponse response) throws IOException {
+    public ResponseEntity<String> reissue(@RequestHeader HttpHeaders header, HttpServletResponse response) {
         if (jwtService.isValidToken(header.getFirst("refreshToken"))) {
             HttpHeaders responseHeader = new HttpHeaders();
 
@@ -213,7 +213,7 @@ public class OAuthController {
     @PostMapping("/signout")
     public ResponseEntity signOut(HttpServletRequest request) {
         oAuthService.signOut((String) request.getAttribute("userId"));
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
 

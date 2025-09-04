@@ -7,8 +7,8 @@ import com.eightlow.decalcomanie.perfume.dto.request.PerfumeSearchRequest;
 import com.eightlow.decalcomanie.perfume.dto.response.DailyRecommendResponse;
 import com.eightlow.decalcomanie.perfume.dto.response.PerfumeNameResponse;
 import com.eightlow.decalcomanie.perfume.dto.response.SearchResponse;
-import com.eightlow.decalcomanie.perfume.service.IPerfumeService;
-import com.eightlow.decalcomanie.user.service.IUserService;
+import com.eightlow.decalcomanie.perfume.service.PerfumeService;
+import com.eightlow.decalcomanie.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +25,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class PerfumeApiController {
 
-    private final IPerfumeService perfumeService;
-    private final IUserService userService;
+    private final PerfumeService perfumeService;
+    private final UserService userService;
 
     // 향수 검색
     @PostMapping("/search")
