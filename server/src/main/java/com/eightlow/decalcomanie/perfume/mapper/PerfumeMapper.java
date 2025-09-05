@@ -1,6 +1,5 @@
 package com.eightlow.decalcomanie.perfume.mapper;
 
-import com.eightlow.decalcomanie.common.mapper.BaseMapper;
 import com.eightlow.decalcomanie.common.mapper.MapStructConfig;
 import com.eightlow.decalcomanie.perfume.dto.NoteListDto;
 import com.eightlow.decalcomanie.perfume.dto.PerfumeDto;
@@ -14,9 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(config = MapStructConfig.class)
-public interface PerfumeMapper extends BaseMapper<Perfume, PerfumeDto> {
+public interface PerfumeMapper {
 
-    @Override
     default PerfumeDto toDto(Perfume perfume) {
         List<ScentDto> accords = new ArrayList<>();
         List<NoteListDto> noteListDtoList = new ArrayList<>();
@@ -75,7 +73,8 @@ public interface PerfumeMapper extends BaseMapper<Perfume, PerfumeDto> {
         return pdto;
     }
 
-    @Override
+    Perfume toEntity(PerfumeDto perfumeDto);
+
     default List<PerfumeDto> toDtoList(List<Perfume> perfumeList) {
         List<PerfumeDto> perfumeDtoList = new ArrayList<>();
 
@@ -85,6 +84,8 @@ public interface PerfumeMapper extends BaseMapper<Perfume, PerfumeDto> {
 
         return perfumeDtoList;
     }
+
+    List<Perfume> toEntityList(List<PerfumeDto> perfumeDtoList);
 
     default PerfumeDto toSimpleDto(Perfume perfume) {
         List<ScentDto> accords = new ArrayList<>();

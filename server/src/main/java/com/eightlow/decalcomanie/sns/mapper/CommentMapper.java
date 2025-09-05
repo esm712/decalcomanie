@@ -1,6 +1,5 @@
 package com.eightlow.decalcomanie.sns.mapper;
 
-import com.eightlow.decalcomanie.common.mapper.BaseMapper;
 import com.eightlow.decalcomanie.common.mapper.MapStructConfig;
 import com.eightlow.decalcomanie.sns.dto.CommentDto;
 import com.eightlow.decalcomanie.sns.entity.Comment;
@@ -10,9 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(config = MapStructConfig.class)
-public interface CommentMapper extends BaseMapper<Comment, CommentDto> {
+public interface CommentMapper {
 
-    @Override
+    CommentDto toDto(Comment comment);
+    Comment toEntity(CommentDto commentDto);
+
     default List<CommentDto> toDtoList(List<Comment> comments) {
         List<CommentDto> dtos = new ArrayList<>();
         for (Comment comment : comments) {
@@ -28,4 +29,5 @@ public interface CommentMapper extends BaseMapper<Comment, CommentDto> {
         }
         return dtos;
     };
+    List<Comment> toEntityList(List<CommentDto> commentDtos);
 }
